@@ -300,15 +300,12 @@ static s4 DSPInterpolate_4_mmx(u4 const edx, u4 const ebp)
 
 void AdjustFrequency(void)
 {
-    u1 const ah = MMXSupport;
     u1 al = SoundInterpType;
-    if (ah == 0) {
-        if (LowPassFilterType >= 3)
-            LowPassFilterType = 0; // HQ
-        if (al >= 3) {
-            al = 1;
-            SoundInterpType = al;
-        }
+    if (LowPassFilterType >= 3)
+        LowPassFilterType = 0; // HQ
+    if (al >= 3) {
+        al = 1;
+        SoundInterpType = al;
     }
 
     interpolatefunc* interpolate;
@@ -317,67 +314,33 @@ void AdjustFrequency(void)
         interpolate = 0;
         break;
 
+    default:
     case 1: // Gaussian
         // Copy from Gaussian to DSPInterP
-        if (ah == 0)
-        {
-            u2* ebx = DSPInterP + 512;
-            u2* edx = DSPInterP + 511;
-            u2 const* esi = Gaussian;
-            u4 ecx = 512;
-            do {
-                u2 const ax = *esi++;
-                *edx-- = ax;
-                *ebx++ = ax;
-            } while (--ecx != 0);
-            interpolate = DSPInterpolate_4;
-        }
-        else { // Gaussian MMX
-            u2 const* ebx = Gaussian;
-            u2 const* edx = Gaussian + 255;
-            u2* esi = DSPInterP;
-            u4 ecx = 256;
-            do {
-                *esi++ = ebx[256];
-                *esi++ = ebx[0];
-                *esi++ = edx[0];
-                *esi++ = edx[256];
-            } while (++ebx, --edx, --ecx != 0);
-            interpolate = DSPInterpolate_4_mmx;
-        }
+        u2* ebx = DSPInterP + 512;
+        u2* edx = DSPInterP + 511;
+        u2 const* esi = Gaussian;
+        u4 ecx = 512;
+        do {
+            u2 const ax = *esi++;
+            *edx-- = ax;
+            *ebx++ = ax;
+        } while (--ecx != 0);
+        interpolate = DSPInterpolate_4;
         break;
 
     case 2: // Cubic spline
     { // Copy from CubicSpline to DSPInterP
         u2 const* ebx = CubicSpline;
         u2* esi = DSPInterP;
-        if (ah == 0) {
-            u4 ecx = 1024;
-            do {
-                u2 const ax = *ebx++;
-                *esi++ = ax - ax / 8;
-            } while (--ecx != 0);
-            interpolate = DSPInterpolate_4;
-        } else { // Cubix MMX
-            u4 ecx = 256;
-            do {
-                u2 const v3 = ebx[256 * 3];
-                *esi++ = v3 - v3 / 8;
-                u2 const v2 = ebx[256 * 2];
-                *esi++ = v2 - v2 / 8;
-                u2 const v1 = ebx[256 * 1];
-                *esi++ = v1 - v1 / 8;
-                u2 const v0 = ebx[256 * 0];
-                *esi++ = v0 - v0 / 8;
-            } while (++ebx, --ecx != 0);
-            interpolate = DSPInterpolate_4_mmx;
-        }
+        u4 ecx = 1024;
+        do {
+            u2 const ax = *ebx++;
+            *esi++ = ax - ax / 8;
+        } while (--ecx != 0);
+        interpolate = DSPInterpolate_4;
         break;
     }
-
-    default: // Fir MMX
-        interpolate = DSPInterpolate_8;
-        break;
     }
     DSPInterpolate = interpolate;
 

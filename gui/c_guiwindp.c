@@ -38,7 +38,6 @@ u1 GUIFreshInputSelect = 1;
 u1 GUILoadPos;
 u1 GUIStatesText5 = 0;
 u1 GUIWincoladd;
-u1 ShowMMXSupport = 2;
 u1* const GUIInputRefP[] = { &pl1contrl, &pl2contrl, &pl3contrl, &pl4contrl, &pl5contrl };
 u4 GUIIStA[3];
 u4 GUILStA[3];
@@ -910,9 +909,6 @@ void DisplayGUIOption(void)
 
     if (GUIOptionTabs[0] == 1) { // Basic
         GUIDisplayTextY(4, 11, 26, "SYSTEM:");
-        if (ShowMMXSupport == 1) {
-            GUIDisplayCheckboxu(4, 11, 31, &MMXSupport, "ENABLE MMX SUPPORT", 7);
-        }
         GUIDisplayCheckboxu(4, 11, 41, &Show224Lines, "SHOW 224 LINES", 9);
 
         GUIDisplayTextY(4, 11, 66, "GFX ENGINES:");
@@ -982,7 +978,7 @@ static char const* NTSCslidText(void const* const p1) // slider var, text
 void DisplayGUIVideo(void)
 {
     // Check features
-    if (MMXSupport != 1 || newgfx16b == 0) {
+    if (newgfx16b == 0) {
         En2xSaI = 0;
         hqFilter = 0;
     }
@@ -1085,31 +1081,6 @@ void DisplayGUIVideo(void)
                 // NTSC filter
                 if (GUINTVID[cvidmode] != 0)
                     GUIDisplayCheckboxu(5, 128, 35, &NTSCFilter, "NTSC FILTER", 0);
-
-                if (MMXSupport != 0) { // Kreed 2x filters
-                    if (GUIDSIZE[cvidmode] != 0) {
-                        GUIDisplayCheckboxun(5, 18, 45, &En2xSaI, 1, "2XSAI ENGINE", 2); // 2x
-                        GUIDisplayCheckboxun(5, 128, 45, &En2xSaI, 2, "SUPER EAGLE", 6); // Seagle
-                        GUIDisplayCheckboxun(5, 18, 55, &En2xSaI, 3, "SUPER 2XSAI", 2); // S2x
-                    }
-                }
-
-                if (MMXSupport != 0) {
-                    // Hq*x
-                    if (GUIHQ2X[cvidmode] != 0) {
-                        GUIDisplayCheckboxu(5, 128, 55, &hqFilter, "HQ FILTER", 1);
-                        if (hqFilter != 0) {
-                            GUIDisplayButtonHoleTu(5, 128, 68, &hqFilterlevel, 2, "2X", 1);
-                            goto hq_x;
-                        }
-                    } else {
-                    hq_x:;
-                        if (GUIHQ3X[cvidmode] != 0)
-                            GUIDisplayButtonHoleTu(5, 158, 68, &hqFilterlevel, 3, "3X", 0);
-                        if (GUIHQ4X[cvidmode] != 0)
-                            GUIDisplayButtonHoleTu(5, 188, 68, &hqFilterlevel, 4, "4X", 0);
-                    }
-                }
             }
 
             char const* const GUIVideoTextB2 = "SCANLINES:"; // Filters.Scanlines
@@ -1245,17 +1216,11 @@ void DisplayGUISound(void)
     GUIDisplayButtonHoleTu(6, 11, 157, &SoundInterpType, 0, GUISoundTextF, 0);
     GUIDisplayButtonHoleTu(6, 11, 167, &SoundInterpType, 1, "GAUSSIAN", 0);
     GUIDisplayButtonHoleTu(6, 11, 177, &SoundInterpType, 2, "CUBIC SPLINE", 0);
-    if (MMXSupport != 0) {
-        GUIDisplayButtonHoleTu(6, 11, 187, &SoundInterpType, 3, "8-POINT", 0);
-    }
 
     GUIDisplayTextY(6, 106, 152, "LOWPASS:");
     GUIDisplayButtonHoleTu(6, 111, 157, &LowPassFilterType, 0, GUISoundTextF, 1);
     GUIDisplayButtonHoleTu(6, 111, 167, &LowPassFilterType, 1, "SIMPLE", 1);
     GUIDisplayButtonHoleTu(6, 111, 177, &LowPassFilterType, 2, "DYNAMIC", 1);
-    if (MMXSupport != 0) {
-        GUIDisplayButtonHoleTu(6, 111, 187, &LowPassFilterType, 3, "HI QUALITY", 0);
-    }
 
     GUIDisplayTextY(6, 6, 93, "SAMPLING RATE:");
     {

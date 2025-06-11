@@ -26,7 +26,7 @@
 
 %include "macros.mac"
 
-EXTSYM vidbuffer,curblank,MMXSupport,GUIOn,GUIOn2,vidbufferofsb,FilteredGUI
+EXTSYM vidbuffer,curblank,GUIOn,GUIOn2,vidbufferofsb,FilteredGUI
 EXTSYM resolutn,lineleft,cfield,hirestiledat,newengen,SpecialLine,HalfTrans
 EXTSYM hqFilter,AddEndBytes,NumBytesPerLine,WinVidMemStart,BitConv32Ptr
 EXTSYM RGBtoYUVPtr,prevline,nextline,deltaptr,xcounter,w1,w2,w3,w4,w5,w6,w7,w8
@@ -861,10 +861,6 @@ NEWSYM hq4x_16b
     cmp byte[GUIOn2],1
     je  nointerp
 .filtergui
-    cmp byte[MMXSupport],0
-    je  nointerp
-    cmp byte[hqFilter],0
-    jne hq4x
 
 ;----------------------------;
 nointerp:

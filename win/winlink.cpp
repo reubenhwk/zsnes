@@ -1599,18 +1599,6 @@ void initwinvideo(void)
         SetHiresOpt();
     }
 
-    if (hqFilter != 0) {
-        if ((GUIHQ2X[cvidmode] != 0) && (hqFilterlevel == 2)) {
-            HQMode = 2;
-        }
-        if ((GUIHQ3X[cvidmode] != 0) && (hqFilterlevel == 3)) {
-            HQMode = 3;
-        }
-        if ((GUIHQ4X[cvidmode] != 0) && (hqFilterlevel == 4)) {
-            HQMode = 4;
-        }
-    }
-
     if ((CurMode != cvidmode) || (prevHQMode != HQMode) || (prevNTSCMode != NTSCFilter) || (changeRes)) {
         CurMode = cvidmode;
         prevHQMode = HQMode;
@@ -1989,22 +1977,12 @@ void UpdateVFrame(void)
         if (T36HZEnabled == 1) {
             memset((void*)buffer_ptr, 0, SPCSize * 2);
         } else {
-            if (MMXSupport == 1) {
-                u4 n = (u4)SPCSize / 4;
-                __m64 const* src = (__m64 const*)DSPBuffer1;
-                __m64* dst = (__m64*)buffer_ptr;
-                do
-                    *dst++ = _m_packssdw(src[0], src[1]);
-                while (src += 2, --n != 0);
-                _mm_empty();
-            } else {
-                for (i = 0; i < SPCSize; i++) {
-                    Buffer[i] = DSPBuffer1[i];
-                    if (DSPBuffer1[i] > 32767)
-                        Buffer[i] = 32767;
-                    if (DSPBuffer1[i] < -32767)
-                        Buffer[i] = -32767;
-                }
+            for (i = 0; i < SPCSize; i++) {
+                Buffer[i] = DSPBuffer1[i];
+                if (DSPBuffer1[i] > 32767)
+                    Buffer[i] = 32767;
+                if (DSPBuffer1[i] < -32767)
+                    Buffer[i] = -32767;
             }
         }
 
@@ -2126,21 +2104,7 @@ void drawscreenwin(void)
 
     DWORD HQMode = 0;
 
-    if (MMXSupport == 0) {
-        hqFilter = 0;
-    }
-
-    if (hqFilter != 0) {
-        if ((GUIHQ2X[cvidmode] != 0) && (hqFilterlevel == 2)) {
-            HQMode = 2;
-        }
-        if ((GUIHQ3X[cvidmode] != 0) && (hqFilterlevel == 3)) {
-            HQMode = 3;
-        }
-        if ((GUIHQ4X[cvidmode] != 0) && (hqFilterlevel == 4)) {
-            HQMode = 4;
-        }
-    }
+    hqFilter = 0;
 
     if (PrevRes != resolutn) {
         if ((SurfaceX == 640) || (SurfaceX == 320)) {

@@ -56,210 +56,60 @@ static void HighResProc(u2** psrc, u1** pdst, u1* ebx)
         }
         do {
             if (*ebx & 3) {
-                if (MMXSupport != 1) {
-                    do {
-                        *(u4*)dst = src[75036 * 2] << 16 | *src;
-                        src += 1;
-                        dst += 4;
-                    } while (--ecx != 0);
-                    if (*ebx & 4 && scanlines == 0) {
-                        if (!(cfield & 1))
-                            dst += NumBytesPerLine;
-                    } else {
-                        switch (scanlines) {
-                        case 1:
-                            break;
-
-                        case 3: {
-                            dst += AddEndBytes;
-                            src -= 256;
-                            u4 ecx = 256;
-                            do {
-                                u4 eax = src[75036 * 2] << 16 | *src;
-                                eax = (eax & HalfTrans[0]) >> 1;
-                                *(u4*)dst = eax;
-                                src += 1;
-                                dst += 4;
-                            } while (--ecx != 0);
-                            break;
-                        }
-
-                        case 2: {
-                            dst += AddEndBytes;
-                            src -= 256;
-                            u4 ecx = 256;
-                            do {
-                                u4 eax = src[75036 * 2] << 16 | *src;
-                                eax = (eax & HalfTrans[0]) >> 1;
-                                u4 edx = (eax & HalfTrans[0]) >> 1;
-                                eax += edx;
-                                *(u4*)dst = eax;
-                                src += 1;
-                                dst += 4;
-                            } while (--ecx != 0);
-                            break;
-                        }
-
-                        default: {
-                            dst += AddEndBytes;
-                            src -= 256;
-                            u4 ecx = 256;
-                            do {
-                                *(u4*)dst = src[75036 * 2] << 16 | *src;
-                                src += 1;
-                                dst += 4;
-                            } while (--ecx != 0);
-                            break;
-                        }
-                        }
-                    }
+                do {
+                    *(u4*)dst = src[75036 * 2] << 16 | *src;
+                    src += 1;
+                    dst += 4;
+                } while (--ecx != 0);
+                if (*ebx & 4 && scanlines == 0) {
+                    if (!(cfield & 1))
+                        dst += NumBytesPerLine;
                 } else {
-                    u1* eax = spritetablea + 512 * 256;
-                    u4 ecx = 64;
-                    do {
-                        asm volatile(
-                            "movq       (%1), %%mm0\n\t"
-                            "movq 300144(%1), %%mm1\n\t"
-                            "movq %%mm0, %%mm2\n\t"
-                            "punpcklwd %%mm1, %%mm0\n\t"
-                            "movq %%mm0,  (%2)\n\t"
-                            "punpckhwd %%mm1, %%mm2\n\t"
-                            "movq %%mm2, 8(%2)\n\t"
-                            "movq %%mm0,  (%0)\n\t"
-                            "movq %%mm2, 8(%0)\n\t" ::"r"(eax),
-                            "r"(src), "r"(dst)
-                            : "memory", "mm0", "mm1", "mm2");
-                        src += 4;
-                        dst += 16;
-                        eax += 16;
-                    } while (--ecx != 0);
-                    if (*ebx & 4 && scanlines == 0) {
-                        if (!(cfield & 1))
-                            dst += NumBytesPerLine;
-                    } else {
-                        switch (scanlines) {
-                        case 1:
-                            break;
+                    switch (scanlines) {
+                    case 1:
+                        break;
 
-                        case 3: {
-                            u1* eax = spritetablea + 512 * 256;
-                            u4 ecx = 32;
-                            dst += AddEndBytes;
-                            u8 mm4 = *(u8*)HalfTrans;
-                            do {
-                                asm volatile(
-                                    "movq   (%0), %%mm0\n\t"
-                                    "movq  8(%0), %%mm1\n\t"
-                                    "movq 16(%0), %%mm2\n\t"
-                                    "movq 24(%0), %%mm3\n\t"
-                                    "pand %2, %%mm0\n\t"
-                                    "pand %2, %%mm1\n\t"
-                                    "pand %2, %%mm2\n\t"
-                                    "pand %2, %%mm3\n\t"
-                                    "psrlw $1, %%mm0\n\t"
-                                    "psrlw $1, %%mm1\n\t"
-                                    "psrlw $1, %%mm2\n\t"
-                                    "psrlw $1, %%mm3\n\t"
-                                    "movq %%mm0,   (%1)\n\t"
-                                    "movq %%mm1,  8(%1)\n\t"
-                                    "movq %%mm2, 16(%1)\n\t"
-                                    "movq %%mm3, 24(%1)\n\t" ::"r"(eax),
-                                    "r"(dst), "y"(mm4)
-                                    : "memory", "mm0", "mm1", "mm2", "mm3");
-                                eax += 32;
-                                dst += 32;
-                            } while (--ecx != 0);
-                            break;
-                        }
+                    case 3: {
+                        dst += AddEndBytes;
+                        src -= 256;
+                        u4 ecx = 256;
+                        do {
+                            u4 eax = src[75036 * 2] << 16 | *src;
+                            eax = (eax & HalfTrans[0]) >> 1;
+                            *(u4*)dst = eax;
+                            src += 1;
+                            dst += 4;
+                        } while (--ecx != 0);
+                        break;
+                    }
 
-                        case 2: {
-                            u1* eax = spritetablea + 512 * 256;
-                            u4 ecx = 64;
-                            dst += AddEndBytes;
-                            u8 mm4 = *(u8*)HalfTransC;
-                            do {
-                                asm volatile(
-                                    "movq  (%0), %%mm0\n\t"
-                                    "movq 8(%0), %%mm1\n\t"
-                                    "pand %2, %%mm0\n\t"
-                                    "pand %2, %%mm1\n\t"
-                                    "psrlw $1, %%mm0\n\t"
-                                    "psrlw $1, %%mm1\n\t"
-                                    "movq %%mm0, %%mm2\n\t"
-                                    "movq %%mm1, %%mm3\n\t"
-                                    "pand %2, %%mm2\n\t"
-                                    "pand %2, %%mm3\n\t"
-                                    "psrlw $1, %%mm2\n\t"
-                                    "psrlw $1, %%mm3\n\t"
-                                    "paddd %%mm2, %%mm0\n\t"
-                                    "paddd %%mm3, %%mm1\n\t"
-                                    "movq %%mm0,  (%1)\n\t"
-                                    "movq %%mm1, 8(%1)\n\t" ::"r"(eax),
-                                    "r"(dst), "y"(mm4)
-                                    : "memory", "mm0", "mm1", "mm2", "mm3");
-                                eax += 16;
-                                dst += 16;
-                            } while (--ecx != 0);
-                            break;
-                        }
+                    case 2: {
+                        dst += AddEndBytes;
+                        src -= 256;
+                        u4 ecx = 256;
+                        do {
+                            u4 eax = src[75036 * 2] << 16 | *src;
+                            eax = (eax & HalfTrans[0]) >> 1;
+                            u4 edx = (eax & HalfTrans[0]) >> 1;
+                            eax += edx;
+                            *(u4*)dst = eax;
+                            src += 1;
+                            dst += 4;
+                        } while (--ecx != 0);
+                        break;
+                    }
 
-                        default: {
-                            if (ebx[1] & 3 && (En2xSaI != 0 || antienab != 0)) {
-                                dst += AddEndBytes;
-                                u1* eax = spritetablea + 512 * 256;
-                                u4 ecx = 64;
-                                src -= 256;
-                                u8 mm4 = *(u8*)HalfTrans;
-                                do {
-                                    asm volatile(
-                                        "movq    576(%1), %%mm0\n\t"
-                                        "movq 300720(%1), %%mm1\n\t"
-                                        "movq %%mm0, %%mm2\n\t"
-                                        "punpcklwd %%mm1, %%mm0\n\t"
-                                        "punpckhwd %%mm1, %%mm2\n\t"
-                                        "movq  (%0), %%mm1\n\t"
-                                        "movq 8(%0), %%mm3\n\t"
-                                        "pand %3, %%mm0\n\t"
-                                        "pand %3, %%mm1\n\t"
-                                        "pand %3, %%mm2\n\t"
-                                        "pand %3, %%mm3\n\t"
-                                        "psrlw $1, %%mm0\n\t"
-                                        "psrlw $1, %%mm1\n\t"
-                                        "psrlw $1, %%mm2\n\t"
-                                        "psrlw $1, %%mm3\n\t"
-                                        "paddd %%mm1, %%mm0\n\t"
-                                        "paddd %%mm3, %%mm2\n\t"
-                                        "movq %%mm0,  (%2)\n\t"
-                                        "movq %%mm2, 8(%2)\n\t" ::"r"(eax),
-                                        "r"(src), "r"(dst), "y"(mm4)
-                                        : "memory", "mm0", "mm1", "mm2", "mm3");
-                                    eax += 16;
-                                    dst += 16;
-                                    src += 4;
-                                } while (--ecx != 0);
-                            } else {
-                                dst += AddEndBytes;
-                                u1* eax = spritetablea + 512 * 256;
-                                u4 ecx = 32;
-                                do {
-                                    asm volatile(
-                                        "movq   (%0), %%mm0\n\t"
-                                        "movq %%mm0,   (%1)\n\t"
-                                        "movq  8(%0), %%mm1\n\t"
-                                        "movq %%mm1,  8(%1)\n\t"
-                                        "movq 16(%0), %%mm2\n\t"
-                                        "movq %%mm2, 16(%1)\n\t"
-                                        "movq 24(%0), %%mm3\n\t"
-                                        "movq %%mm3, 24(%1)\n\t" ::"r"(eax),
-                                        "r"(dst)
-                                        : "memory", "mm0", "mm1", "mm2", "mm3");
-                                    eax += 32;
-                                    dst += 32;
-                                } while (--ecx != 0);
-                            }
-                            break;
-                        }
-                        }
+                    default: {
+                        dst += AddEndBytes;
+                        src -= 256;
+                        u4 ecx = 256;
+                        do {
+                            *(u4*)dst = src[75036 * 2] << 16 | *src;
+                            src += 1;
+                            dst += 4;
+                        } while (--ecx != 0);
+                        break;
+                    }
                     }
                 }
                 goto end;
@@ -273,7 +123,7 @@ static void HighResProc(u2** psrc, u1** pdst, u1* ebx)
         } while (scanlines != 0);
         if (!(cfield & 1))
             dst += NumBytesPerLine;
-    } else if (MMXSupport != 1) {
+    } else {
         do {
             *(u4*)dst = *src * 0x00010001;
             src += 1;
@@ -289,43 +139,6 @@ static void HighResProc(u2** psrc, u1** pdst, u1* ebx)
             dst += 4;
         } while (--ecx != 0);
         src -= 75036 * 2;
-    } else {
-        {
-            u4 ecx = 64;
-            do {
-                asm volatile(
-                    "movq (%0), %%mm0\n\t"
-                    "movq %%mm0, %%mm1\n\t"
-                    "punpcklwd %%mm1, %%mm0\n\t"
-                    "movq %%mm0,  (%1)\n\t"
-                    "punpckhwd %%mm1, %%mm1\n\t"
-                    "movq %%mm1, 8(%1)" ::"r"(src),
-                    "r"(dst)
-                    : "memory", "mm0", "mm1");
-                src += 4;
-                dst += 16;
-            } while (--ecx != 0);
-        }
-        dst += AddEndBytes;
-        src -= 256;
-        src += 75036 * 2;
-        {
-            u4 ecx = 64;
-            do {
-                asm volatile(
-                    "movq (%0), %%mm0\n\t"
-                    "movq %%mm0, %%mm1\n\t"
-                    "punpcklwd %%mm1, %%mm0\n\t"
-                    "movq %%mm0,  (%1)\n\t"
-                    "punpckhwd %%mm1, %%mm1\n\t"
-                    "movq %%mm1, 8(%1)" ::"r"(src),
-                    "r"(dst)
-                    : "memory", "mm0", "mm1");
-                src += 4;
-                dst += 16;
-            } while (--ecx != 0);
-            src -= 75036 * 2;
-        }
     }
 end:
     *psrc = src;
@@ -747,11 +560,6 @@ static void MMXInterpolwin(u2* esi, u1* edi, u1 const dl)
 
 static void interpolate640x480x16bwin(u2* src, u1* dst, u1 dl)
 {
-    if (MMXSupport == 1) {
-        MMXInterpolwin(src, dst, dl);
-        return;
-    }
-
     u1* ebx = SelectTile();
     InterPtr = ebx;
 
@@ -1016,10 +824,6 @@ void copy640x480x16bwin(void)
 #endif
     // Check if interpolation mode
     if (FilteredGUI != 0 || GUIOn2 != 1) {
-        if (MMXSupport == 1 && En2xSaI != 0) {
-            Process2xSaIwin(src, dst);
-            return;
-        }
         if (antienab == 1) {
             interpolate640x480x16bwin(src, dst, dl);
             return;
@@ -1033,28 +837,11 @@ void copy640x480x16bwin(void)
             {
                 u4 ecx = 256;
                 if (*ebx < 1) {
-                    if (MMXSupport == 1) {
-                        u4 ecx = 64;
-                        do {
-                            asm volatile(
-                                "movq (%0), %%mm0\n\t"
-                                "movq %%mm0, %%mm1\n\t"
-                                "punpcklwd %%mm1, %%mm0\n\t"
-                                "punpckhwd %%mm1, %%mm1\n\t"
-                                "movq %%mm0,  (%1)\n\t"
-                                "movq %%mm1, 8(%1)" ::"r"(src),
-                                "r"(dst)
-                                : "memory", "mm0", "mm1");
-                            src += 4;
-                            dst += 16;
-                        } while (--ecx != 0);
-                    } else {
-                        do {
-                            u4 eax = *src++ * 0x00010001U;
-                            *(u4*)dst = eax;
-                            dst += 4;
-                        } while (--ecx != 0);
-                    }
+                    do {
+                        u4 eax = *src++ * 0x00010001U;
+                        *(u4*)dst = eax;
+                        dst += 4;
+                    } while (--ecx != 0);
                 } else if (*ebx == 1) {
                     *ebx = 0;
                     if (res512switch & 1) {
@@ -1100,77 +887,25 @@ void copy640x480x16bwin(void)
         u1* ebx = SelectTile();
         do {
             if (*ebx <= 1) {
-                if (MMXSupport == 1) {
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 64;
-                        do {
-                            asm volatile(
-                                "movq (%1), %%mm0\n\t"
-                                "movq %%mm0, %%mm1\n\t"
-                                "punpcklwd %%mm1, %%mm0\n\t"
-                                "punpckhwd %%mm1, %%mm1\n\t"
-                                "movq %%mm0,  (%2)\n\t"
-                                "movq %%mm1, 8(%2)\n\t"
-                                "movq %%mm0,  (%0)\n\t"
-                                "movq %%mm1, 8(%0)" ::"r"(eax),
-                                "r"(src), "r"(dst)
-                                : "memory", "mm0", "mm1");
-                            src += 4;
-                            dst += 16;
-                            eax += 16;
-                        } while (--ecx != 0);
-                    }
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 64;
-                        dst += AddEndBytes;
-                        u8 const trans = *(u8*)HalfTrans;
-                        do {
-                            asm volatile(
-                                "movq  (%0), %%mm0\n\t"
-                                "movq 8(%0), %%mm1\n\t"
-                                "pand %2, %%mm0\n\t"
-                                "pand %2, %%mm1\n\t"
-                                "psrlw $1, %%mm0\n\t"
-                                "psrlw $1, %%mm1\n\t"
-                                "movq %%mm0, %%mm2\n\t"
-                                "movq %%mm1, %%mm3\n\t"
-                                "pand %2, %%mm2\n\t"
-                                "pand %2, %%mm3\n\t"
-                                "psrlw $1, %%mm2\n\t"
-                                "psrlw $1, %%mm3\n\t"
-                                "paddd %%mm2, %%mm0\n\t"
-                                "paddd %%mm3, %%mm1\n\t"
-                                "movq %%mm0,  (%1)\n\t"
-                                "movq %%mm1, 8(%1)" ::"r"(eax),
-                                "r"(dst), "y"(trans)
-                                : "memory", "mm0", "mm1", "mm2", "mm3");
-                            eax += 16;
-                            dst += 16;
-                        } while (--ecx != 0);
-                    }
-                } else {
-                    {
-                        u4 ecx = 256;
-                        do {
-                            u4 eax = *src++ * 0x00010001U;
-                            *(u4*)dst = eax;
-                            dst += 4;
-                        } while (--ecx != 0);
-                    }
-                    {
-                        u4 ecx = 256;
-                        src -= 256;
-                        dst += AddEndBytes;
-                        do {
-                            u4 eax = (*src++ * 0x00010001U & HalfTrans[0]) >> 1;
-                            u4 edx = (eax & HalfTrans[0]) >> 1;
-                            eax += edx;
-                            *(u4*)dst = eax;
-                            dst += 4;
-                        } while (--ecx != 0);
-                    }
+                {
+                    u4 ecx = 256;
+                    do {
+                        u4 eax = *src++ * 0x00010001U;
+                        *(u4*)dst = eax;
+                        dst += 4;
+                    } while (--ecx != 0);
+                }
+                {
+                    u4 ecx = 256;
+                    src -= 256;
+                    dst += AddEndBytes;
+                    do {
+                        u4 eax = (*src++ * 0x00010001U & HalfTrans[0]) >> 1;
+                        u4 edx = (eax & HalfTrans[0]) >> 1;
+                        eax += edx;
+                        *(u4*)dst = eax;
+                        dst += 4;
+                    } while (--ecx != 0);
                 }
             } else {
                 u2* src_ = src;
@@ -1191,75 +926,23 @@ void copy640x480x16bwin(void)
         u1* ebx = SelectTile();
         do {
             if (*ebx <= 1) {
-                if (MMXSupport == 1) {
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 64;
-                        do {
-                            asm volatile(
-                                "movq (%1), %%mm0\n\t"
-                                "movq %%mm0, %%mm1\n\t"
-                                "punpcklwd %%mm1, %%mm0\n\t"
-                                "punpckhwd %%mm1, %%mm1\n\t"
-                                "movq %%mm0,  (%2)\n\t"
-                                "movq %%mm1, 8(%2)\n\t"
-                                "movq %%mm0,  (%0)\n\t"
-                                "movq %%mm1, 8(%0)" ::"r"(eax),
-                                "r"(src), "r"(dst)
-                                : "memory", "mm0", "mm1");
-                            src += 4;
-                            dst += 16;
-                            eax += 16;
-                        } while (--ecx != 0);
-                    }
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 32;
-                        dst += AddEndBytes;
-                        u8 const trans = *(u8*)HalfTrans;
-                        do {
-                            asm volatile(
-                                "movq   (%0), %%mm0\n\t"
-                                "movq  8(%0), %%mm1\n\t"
-                                "movq 16(%0), %%mm2\n\t"
-                                "movq 24(%0), %%mm3\n\t"
-                                "pand %2, %%mm0\n\t"
-                                "pand %2, %%mm1\n\t"
-                                "pand %2, %%mm2\n\t"
-                                "pand %2, %%mm3\n\t"
-                                "psrlw $1, %%mm0\n\t"
-                                "psrlw $1, %%mm1\n\t"
-                                "psrlw $1, %%mm2\n\t"
-                                "psrlw $1, %%mm3\n\t"
-                                "movq %%mm0,   (%1)\n\t"
-                                "movq %%mm1,  8(%1)\n\t"
-                                "movq %%mm2, 16(%1)\n\t"
-                                "movq %%mm3, 24(%1)" ::"r"(eax),
-                                "r"(dst), "y"(trans)
-                                : "memory", "mm0", "mm1", "mm2", "mm3");
-                            eax += 32;
-                            dst += 32;
-                        } while (--ecx != 0);
-                    }
-                } else {
-                    {
-                        u4 ecx = 256;
-                        do {
-                            u4 eax = *src++ * 0x00010001U;
-                            *(u4*)dst = eax;
-                            dst += 4;
-                        } while (--ecx != 0);
-                    }
-                    {
-                        u4 ecx = 256;
-                        src -= 256;
-                        dst += AddEndBytes;
-                        do {
-                            u4 eax = (*src++ * 0x00010001U & HalfTrans[0]) >> 1;
-                            *(u4*)dst = eax;
-                            dst += 4;
-                        } while (--ecx != 0);
-                    }
+                 {
+                    u4 ecx = 256;
+                    do {
+                        u4 eax = *src++ * 0x00010001U;
+                        *(u4*)dst = eax;
+                        dst += 4;
+                    } while (--ecx != 0);
+                }
+                {
+                    u4 ecx = 256;
+                    src -= 256;
+                    dst += AddEndBytes;
+                    do {
+                        u4 eax = (*src++ * 0x00010001U & HalfTrans[0]) >> 1;
+                        *(u4*)dst = eax;
+                        dst += 4;
+                    } while (--ecx != 0);
                 }
             } else {
                 u2* src_ = src;
@@ -1282,62 +965,19 @@ void copy640x480x16bwin(void)
         do {
             u4 ecx = 256;
             if (*ebx < 1) {
-                if (MMXSupport == 1) {
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 64;
-                        do {
-                            asm volatile(
-                                "movq (%1), %%mm0\n\t"
-                                "movq %%mm0, %%mm1\n\t"
-                                "punpcklwd %%mm1, %%mm0\n\t"
-                                "movq %%mm0,  (%2)\n\t"
-                                "punpckhwd %%mm1, %%mm1\n\t"
-                                "movq %%mm1, 8(%2)\n\t"
-                                "movq %%mm0,  (%0)\n\t"
-                                "movq %%mm1, 8(%0)" ::"r"(eax),
-                                "r"(src), "r"(dst)
-                                : "memory", "mm0", "mm1");
-                            src += 4;
-                            dst += 16;
-                            eax += 16;
-                        } while (--ecx != 0);
-                    }
-                    {
-                        u1* eax = spritetablea + 512 * 256;
-                        u4 ecx = 32;
-                        dst += AddEndBytes;
-                        do {
-                            asm volatile(
-                                "movq   (%0), %%mm0\n\t"
-                                "movq %%mm0,   (%1)\n\t"
-                                "movq  8(%0), %%mm1\n\t"
-                                "movq %%mm1,  8(%1)\n\t"
-                                "movq 16(%0), %%mm2\n\t"
-                                "movq %%mm2, 16(%1)\n\t"
-                                "movq 24(%0), %%mm3\n\t"
-                                "movq %%mm3, 24(%1)" ::"r"(eax),
-                                "r"(dst)
-                                : "memory", "mm0", "mm1", "mm2", "mm3");
-                            eax += 32;
-                            dst += 32;
-                        } while (--ecx != 0);
-                    }
-                } else {
-                    do {
-                        u4 eax = *src++ * 0x00010001U;
-                        *(u4*)dst = eax;
-                        dst += 4;
-                    } while (--ecx != 0);
-                    src -= 256;
-                    dst += AddEndBytes;
-                    u4 ecx = 256;
-                    do {
-                        u4 eax = *src++ * 0x00010001U;
-                        *(u4*)dst = eax;
-                        dst += 4;
-                    } while (--ecx != 0);
-                }
+                do {
+                    u4 eax = *src++ * 0x00010001U;
+                    *(u4*)dst = eax;
+                    dst += 4;
+                } while (--ecx != 0);
+                src -= 256;
+                dst += AddEndBytes;
+                u4 ecx = 256;
+                do {
+                    u4 eax = *src++ * 0x00010001U;
+                    *(u4*)dst = eax;
+                    dst += 4;
+                } while (--ecx != 0);
             } else if (*ebx == 1) {
                 *ebx = 0;
                 if (res512switch & 1) {
@@ -1378,7 +1018,4 @@ void copy640x480x16bwin(void)
         break;
     }
     }
-
-    if (MMXSupport == 1)
-        asm volatile("emms");
 }
