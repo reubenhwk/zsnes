@@ -82,7 +82,11 @@ typedef struct HDMAInfo {
     u1 count; // # of bytes to transfer/line
     u2 addr_inc; // Address increment
 } __attribute__((packed)) HDMAInfo;
+#if 1
+STATIC_ASSERT(sizeof(HDMAInfo) == 35);
+#else
 STATIC_ASSERT(sizeof(HDMAInfo) == 19);
+#endif
 
 extern HDMAInfo hdmadata[8];
 

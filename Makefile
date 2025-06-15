@@ -7,14 +7,14 @@ ARCH := LINUX
 CC ?= gcc
 CXX ?= g++
 
-COMMON_FLAGS = -m32 -pthread -O1 -fno-pic -D_FORTIFY_SOURCE=2 -L/usr/lib32 -ffunction-sections -fdata-sections -Wfatal-errors -w
+COMMON_FLAGS = -pthread -g -fno-pic -D_FORTIFY_SOURCE=2 -ffunction-sections -fdata-sections -Wfatal-errors -w
 
 # TODO: FreeBSD has a patch for being able to build without -fcommon
 CFLAGS += $(COMMON_FLAGS) -std=gnu99 -fcommon
 CXXFLAGS += $(COMMON_FLAGS) -std=gnu++14
-LDFLAGS += -Wl,--as-needed -no-pie -L/usr/lib32 -Wl,--gc-sections -lz
+LDFLAGS += -Wl,--as-needed -no-pie -Wl,--gc-sections -lz
 # -O1 is mandatory
-ASMFLAGS += -O1 -w-orphan-labels
+ASMFLAGS += -w-orphan-labels
 
 #WITH_AO       := yes
 #WITH_DEBUGGER := yes
@@ -282,7 +282,7 @@ endif
 else
 SRCS += mmlib/linux.c
 
-ASMFLAGS += -felf32 -DELF
+ASMFLAGS += -felf64 -DELF
 
 ifdef WITH_OPENGL
 LDFLAGS += -lGL

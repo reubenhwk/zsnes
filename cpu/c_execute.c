@@ -273,10 +273,7 @@ void execute(u4* const pedx, u1** const pebp, u1** const pesi, eop*** const pedi
             u4 ecx;
             u4 ebx = 0;
             u4 const op = *ebp++;
-            asm volatile("push %%ebp;  mov %0, %%ebp;  call *%5;  mov %%ebp, %0;  pop %%ebp"
-                         : "+a"(ebp), "=c"(ecx), "+b"(ebx), "+S"(esi), "+D"(edi)
-                         : "c"(opcjmptab[op])
-                         : "cc", "memory");
+	    asm_call(opcjmptab[op]);
         }
 
         p = *esi++;
@@ -291,10 +288,20 @@ void execute(u4* const pedx, u1** const pebp, u1** const pesi, eop*** const pedi
         u4 ecx = 0;
         u4 ebx = p; // XXX HACK: We run out of registers.  p is guaranteed to have only the lower 8 bits set, which is sufficient
         // XXX hack: GCC cannot handle ebp as input/output, so take the detour over eax
+#if defined __x86_64__
+	u8 foo = (u8)ebx;
+        asm volatile("push %%rbp;  mov %0, %%rbp;  call *(%5, %3, %c6);  mov %%rbp, %0;  pop %%rbp"
+                     : "+a"(ebp), "+c"(ecx), "+d"(edx), "+b"(foo), "+S"(esi), "+D"(edi)
+                     : "n"(sizeof(*edi))
+                     : "cc", "memory");
+#elif defined __i386__
         asm volatile("push %%ebp;  mov %0, %%ebp;  call *(%5, %3, %c6);  mov %%ebp, %0;  pop %%ebp"
                      : "+a"(ebp), "+c"(ecx), "+d"(edx), "+b"(ebx), "+S"(esi), "+D"(edi)
                      : "n"(sizeof(*edi))
                      : "cc", "memory");
+#else
+#error unknown architecture
+#endif
     }
 cpuover :
 
@@ -302,10 +309,7 @@ cpuover :
     u4 ecx = 0;
     u4 ebx = 0;
     // XXX hack: GCC cannot handle ebp as input/output, so take the detour over eax
-    asm volatile("push %%ebp;  mov %0, %%ebp;  call %P6;  mov %%ebp, %0;  pop %%ebp"
-                 : "+a"(ebp), "+c"(ecx), "+d"(edx), "+b"(ebx), "+S"(esi), "+D"(edi)
-                 : "X"(cpuover)
-                 : "cc", "memory");
+    asm_call(cpuover);
 }
 
     *pedx = edx;

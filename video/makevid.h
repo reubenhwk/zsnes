@@ -10,7 +10,7 @@ typedef struct SpriteInfo {
     u1 pal;
     u1 status;
 } SpriteInfo;
-STATIC_ASSERT(sizeof(SpriteInfo) == 8);
+STATIC_ASSERT(sizeof(SpriteInfo) == 12);
 
 extern void dualstartprocess();
 extern void makedualwinsp();
